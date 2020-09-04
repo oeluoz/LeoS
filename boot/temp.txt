@@ -1,0 +1,14 @@
+; loader_print:
+;     mov ax,0xb800                 ;文本显示区域
+;     mov es,ax
+;     mov di,0
+;     mov si,message
+;     mov cx,7
+; .L1:
+;     mov dl,[ds:si]
+;     mov byte [es:di],dl
+;     add si,1
+;     add di,1
+;     mov byte [es:di],0xA40
+;     add di,1
+;     loop .L1

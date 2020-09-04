@@ -1,0 +1,18 @@
+megs:32
+
+romimage:file=$BXSHARE/BIOS-bochs-latest
+vgaromimage:file=$BXSHARE/VGABIOS-lgpl-latest
+
+
+boot:disk
+
+log:bochsout.txt
+
+mouse:enabled=0
+
+keyboard: keymap=$BXSHARE/keymaps/x11-pc-us.map
+
+#disk
+ata0:enabled=1,ioaddr1=0x1f0,ioaddr2=0x3f0,irq=14
+ata0-master:type=disk,path="LeoS.img",mode=flat,cylinders=20, heads=16, spt=63
+
