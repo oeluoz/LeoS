@@ -14,11 +14,11 @@
 /*中断门描述符*/
 struct  gate_desc
 {
-    uint16_t offsetHigh16;
-    uint8_t attribute;
-    uint8_t dcount; //4th B默认值
-    uint16_t selector;
-    uint16_t offsetLow16;
+   uint16_t offsetLow16;
+   uint16_t selector;
+   uint8_t dcount; //4th B默认值
+   uint8_t attribute; 
+   uint16_t offsetHigh16;
 };
 // 静态函数声明,非必须
 static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function);
@@ -54,7 +54,7 @@ static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler 
     p_gdesc->selector=SELECTOR_K_CODE;
     p_gdesc->dcount=0;
     p_gdesc->attribute=attr;
-    p_gdesc->offsetLow16=((uint32_t)function & 0xFFFF0000) >> 16;
+    p_gdesc->offsetHigh16=((uint32_t)function & 0xFFFF0000) >> 16;
 }
 
 /*初始化中断描述符表*/
