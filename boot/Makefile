@@ -7,18 +7,31 @@ LIB = -I ./../include
 INCLUDE = ./../include
 ASFLAGS = -f elf32
 
-CFLAGS = -Wall $(LIB) -fno-stack-protector -c -m32
+#-Wall 显示所有警告 -fno-builtin 关闭内建函数(这样才可以声明标准库里的同名函数 比如exit open等) 
+# -fno-stack-protector 关闭栈保护
+CFLAGS = -Wall $(LIB) -fno-stack-protector -fno-builtin -c -m32 -DNDEBUG
 LDFLAGS = -m elf_i386 -Ttext $(ENTRY_POINT) -e main
 
 OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
-      $(BUILD_DIR)/printk.o $(BUILD_DIR)/kernel.o 
-
+      $(BUILD_DIR)/printk.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/timer.o $(BUILD_DIR)/debug.o $(BUILD_DIR)/string.o $(BUILD_DIR)/bitmap.o $(BUILD_DIR)/memory.o
+	  
+ 
 # C代码编译
 $(BUILD_DIR)/main.o : ./../kernel/main.c $(INCLUDE)/*.h
 	$(CC) $(CFLAGS) $< -o $@
 $(BUILD_DIR)/init.o : ./../kernel/init.c $(INCLUDE)/*.h
 	$(CC) $(CFLAGS) $< -o $@
 $(BUILD_DIR)/interrupt.o : ./../kernel/interrupt.c $(INCLUDE)/*.h
+	$(CC) $(CFLAGS) $< -o $@
+$(BUILD_DIR)/timer.o : ./../device/timer.c $(INCLUDE)/*.h
+	$(CC) $(CFLAGS) $< -o $@
+$(BUILD_DIR)/debug.o : ./../kernel/debug.c $(INCLUDE)/*.h
+	$(CC) $(CFLAGS) $< -o $@
+$(BUILD_DIR)/string.o : ./../lib/string.c $(INCLUDE)/*.h
+	$(CC) $(CFLAGS) $< -o $@
+$(BUILD_DIR)/bitmap.o : ./../mm/bitmap.c $(INCLUDE)/*.h
+	$(CC) $(CFLAGS) $< -o $@	
+$(BUILD_DIR)/memory.o : ./../mm/memory.c $(INCLUDE)/*.h
 	$(CC) $(CFLAGS) $< -o $@
 
 # 汇编代码编译

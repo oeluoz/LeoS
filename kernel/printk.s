@@ -98,14 +98,14 @@ print:
     shl bx,1
     mov byte [gs:bx],0x20
     inc bx
-    mov byte [gs:bx],0x07
+    mov byte [gs:bx],0xa
     shr bx,1
     jmp .setCursor
 .print_other:
     shl bx,1
     mov byte [gs:bx],cl
     inc bx
-    mov byte [gs:bx],0x07
+    mov byte [gs:bx],0x0a
     shr bx,1
     inc bx
     cmp bx,2000         ;判断是否还在屏幕范围之内，否则需要刷新屏幕
@@ -134,7 +134,7 @@ print:
     mov ebx,3840        ;最后一行全部用空格填充
     mov ecx,80
 .cls:
-    mov word [gs:ebx],0x0720
+    mov word [gs:ebx],0x0a20
     add ebx,2
     loop .cls
 

@@ -66,7 +66,7 @@ loader_start:
     loop .find_max_mem_area
     jmp .mem_get_ok
 .mem_get_ok:
-    mov [total_mem_bytes], edx   ;0x983
+    mov [total_mem_bytes], edx   ;内存总量存放在0x983
     
 ;开启A20地址线
     in al,0x92
@@ -99,7 +99,7 @@ p_mode_start:
 ;加载内核到0x7000
     mov eax,KERNEL_START_SECTOR         ;内核所在扇区号
     mov ebx,KERNEL_BASE_ADDR            ;内核加载的目标地址
-    mov ecx,20                          ;读出kernel扇区数
+    mov ecx,40                          ;读出kernel扇区数
     call rd_disk_m_32                   ;保护模式下读取硬盘
 
 ;创建页目录及页表并初始化页内存位图
@@ -156,7 +156,7 @@ setup_page:
     ;放置PDE768的原因是操作系统内核放置在低端1MB空间之内，但是操作虚拟地址空间是在高1GB空间，保证3GB以上的虚拟地址
     ;对应低端的1MB内核空间
     sub eax,0x1000
-    mov [PAGE_DIR_TABLE_POS+4092],eax
+    mov [PAGE_DIR_TABLE_POS+4092],eax           ;最后一个页表项指向的4K页表是它自己。自己有1024个页表项(目录项)
 ;创建第 0个页表的PTE：用来映射1MB内存空间
     mov ecx,256               ;1MB低端内存的PTE
     mov esi,0

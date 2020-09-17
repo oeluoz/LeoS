@@ -1,5 +1,5 @@
 ;boot.s 主引导程序
-;
+;第一个扇区是通过BIOS读取到内存0x7c00，然后跳转到0x7c00位置执行代码
 ;
 %include "boot.inc"
 section mbr vstart=0x7c00         ;通过jmp 0x0000:0x7c00 跳转到MBR，此时段寄存器cs=0
@@ -131,7 +131,7 @@ rd_disk_m_16:
    ret
 
 
-message db "Welcome To LeoS!"
+message db "Welcome To LeOS!"
 times 510-($-$$) db 0          ;扇区最后两个字节0xaa55，除代码和数据之外的内容用0填充
 db 0x55,0xaa                   ;386小端模式
 
