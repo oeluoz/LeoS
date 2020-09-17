@@ -22,3 +22,5 @@ LeoS是在看[《操作系统真象还原》](https://book.douban.com/search/郑
 - [《Linux内核完全剖析》 赵炯](https://book.douban.com/subject/3229243//)
 - [《x86汇编语言》](https://book.douban.com/subject/20492528/)
 
+## 致谢
+非常感谢[nightmare-man](https://github.com/nightmare-man/os_kernel/commits?author=nightmare-man)在学习操作系统过程中的指导
