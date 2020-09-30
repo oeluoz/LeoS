@@ -3,6 +3,8 @@
 #include "./../include/global.h"
 #include "./../include/printk.h"
 #include "./../include/io.h"
+#include "./../include/thread.h"
+#include "./../include/debug.h"
 
 #define PIC_M_CTRL 0x20	       // 这里用的可编程中断控制器是8259A,主片的控制端口是0x20
 #define PIC_M_DATA 0x21	       // 主片的数据端口是0x21
@@ -31,6 +33,9 @@ static struct gate_desc idt[IDT_DESC_CNT];   // idt是中断描述符表,本质�
 extern intr_handler intr_entry_table[20];	 //数组中存放的是指针 void *类型 
 char * intr_name[IDT_DESC_CNT];
 intr_handler idt_table[IDT_DESC_CNT];      //
+
+//线程相关
+uint32_t ticks; //内核自中断开启
 
 /*初始化可编程中断控制器8259A */
 static void pic_init(void) {
@@ -65,24 +70,44 @@ static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler 
 
 /*初始化中断描述符表*/
 static void idt_desc_init(void) {
-   int i;
-   for (i = 0; i < IDT_DESC_CNT; i++) {
+   for (int i = 0; i < IDT_DESC_CNT; i++) {
       make_idt_desc(&idt[i], IDT_DESC_ATTR_DPL0, intr_entry_table[i]); 
    }
    println("idt_desc_init done\n");
 }
 /*通用中断处理函数*/
 static void general_intr_handler(uint8_t vec_nr) {
-   //
    if(vec_nr == 0x27 || vec_nr == 0x2f){
       return ;
    }
-   println("int vector : 0x");
+   set_cursor(0); //重置光标到屏幕左上角
+   int cursor = 0;
+   while(cursor<320){   //清空4行页面
+      print(' ');
+      cursor++;
+   }
+   set_cursor(0);
+   println("-----------Exception---------------\n");
+   println("-----------Exception---------------\n");
+   println("-----------Exception---------------\n");
+   println("-----------Exception---------------\n");
+   println("-----------Exception---------------\n");
+   
+   set_cursor(88); //第二行第8个字符开始打印
    printint(vec_nr);
-   print('\n');
+   println(" ");
+   println(intr_name[vec_nr]);
+   if(vec_nr == 14) { //若为PageFault，将缺失的地址打印出来并且悬停
+      int page_fault_vaddr = 0;
+      asm("mov %%cr2,%0":"=r"(page_fault_vaddr)); //cr2存放的是造成page_fault的地址
+      println("page fault addr is: ");
+      printint(page_fault_vaddr);
+   }
+   while(1);
 }
+
 /* 完成一般中断处理函数注册及异常名称注册 */
-static void exception_init(void) {
+static void exception_init() {
    int i;
    for (i = 0; i < IDT_DESC_CNT; i++) {
 
@@ -116,13 +141,16 @@ static void exception_init(void) {
    intr_name[19] = "#XF SIMD Floating-Point Exception";
 
 }
+
 /* 开中断并返回开中断前的状态*/
 enum intr_status intr_enable() {
    enum intr_status old_status;
    if (INTR_ON == intr_get_status()) {
+      println("old status on,now we turn it on\n");
       old_status = INTR_ON;
       return old_status;
    } else {
+      println("old status off,now we turn it on\n");
       old_status = INTR_OFF;
       asm volatile("sti");
       return old_status;
@@ -150,6 +178,11 @@ enum intr_status intr_get_status() {
    GET_EFLAGS(eflags);
    return (EFLAGS_IF & eflags) ? INTR_ON : INTR_OFF;
 }
+/*在中断处理数组中第vector_no个元素中注册安装中断处理程序function*/
+void register_handler(uint8_t vector_no,intr_handler function) {
+   idt_table[vector_no] = function;
+}
+
 /*完成有关中断的所有初始化工作*/
 void idt_init() {
    println("idt_init start\n");
@@ -171,3 +204,5 @@ void idt_init() {
 }
 // 中断第二次测试：没有执行kernel中的内容，错误原因1：中断描述符没有按照指定格式
 // 错误原因2：中断描述符low 16bits初始化错误
+// 中断第三次测试，现在的内核代码已经超出20k，在interrupt.c中增加内容导致扇区写入出错，将扇区增加到
+// 200(100KB)，内核代码不会超过100KB

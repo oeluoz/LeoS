@@ -114,6 +114,7 @@ uint32_t* pde_ptr(uint32_t vaddr) {
     //PDT 1023 指向的是PDT自己，高10bit全为1首先得到PDT的基址，然后将寻找到的页目录表当做页表，中间10bit作为索引，索引全为1寻找到的是最后一项，即为
     //页目录表的基址，加上页目录项的偏移即为PDE对应的内存位置
     uint32_t*pde = (uint32_t*)((0xfffff000) + PDE_IDX(vaddr)*4);
+    return pde;
 }
 
 /**

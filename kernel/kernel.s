@@ -18,7 +18,12 @@ section .text
 intr%1entry:		 ; 每个中断处理程序都要压入中断向量号，
                    ; 所以一个中断类型一个中断处理程序，
                    ; 自己知道自己的中断向量号是多少
-   %2
+   %2              ;中断若有错误码会压在eip后面，根据参数展开为nop或者push 0 指令
+   ; mov byte [gs:160],'p'
+   ; mov byte [gs:162],'p'
+   ; mov byte [gs:164],'p'
+   ; mov byte [0xb8000],'A'
+   ; jmp $
    ;保存上下文环境
    push ds
    push es
@@ -33,7 +38,12 @@ intr%1entry:		 ; 每个中断处理程序都要压入中断向量号，
 
    push %1                       ;不管idt_table中的目标程序是否需要参数
                                  ;一律push 中断向量号
+
+   mov byte [gs:160],'p'
+   mov byte [0xb8000],'A'
+   ; jmp $
    call [idt_table + %1*4]
+   
    jmp intr_exit
 
 section .data

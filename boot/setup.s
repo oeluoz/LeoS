@@ -95,11 +95,12 @@ p_mode_start:
     mov gs,ax
     mov byte [gs:160],'p'
     mov byte [0xb8000],'A'
+    
 
 ;加载内核到0x7000
     mov eax,KERNEL_START_SECTOR         ;内核所在扇区号
     mov ebx,KERNEL_BASE_ADDR            ;内核加载的目标地址
-    mov ecx,40                          ;读出kernel扇区数
+    mov ecx,200                         ;读出kernel扇区数
     call rd_disk_m_32                   ;保护模式下读取硬盘
 
 ;创建页目录及页表并初始化页内存位图
