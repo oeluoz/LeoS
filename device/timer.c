@@ -40,8 +40,9 @@ static void intr_timer_handleer() {
    } else {
       cur_thread->ticks--;
    }
-   // printint(cur_thread->ticks);
-   // print('\n');
+   // if(cur_thread->ticks > 0x0)
+   //     printint(cur_thread->ticks);
+   // print('-');
 }
 /* 初始化PIT8253 */
 void timer_init() {

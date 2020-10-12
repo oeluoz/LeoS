@@ -57,12 +57,13 @@ int main(void ){
     println("This is thread test!!!\n");
     println("This is thread test!!!\n");
     println("This is thread test!!!\n");
-    thread_start("k_thread_a",8,k_thread_a,"argA ");
 
-    
+
+    thread_start("k_thread_a",8,k_thread_a,"argA ");
     /*现在值测试主线程，其他线程被注释掉*/
     thread_start("k_thread_b",31,k_thread_a,"argB ");
-    println("Multithread test!\n");
+   
+   
     // while(1);
     // asm volatile("sti;");    /*打开中断之后就会执行kernel.s在里面初始化中断函数*/
     //                             /*在8259A已经通过IMR将除时钟之外的所有外部中断都屏蔽了，开启中断之后，处理器收到来自时钟的中断*/
@@ -70,11 +71,6 @@ int main(void ){
     while(1){
          println("Main");
     }
-    // println("why the clock does not work");
-    while(1);
-    
-    println("\nafter clock interrupt!\n");
-    while(1); 
     return 0;
 } 
 
@@ -82,7 +78,6 @@ int main(void ){
 void k_thread_a(void* arg) {
     char* para =(char*)arg;
     while(1) {
-        println("                    ");
         println(para);
     }
 }

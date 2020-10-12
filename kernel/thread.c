@@ -32,7 +32,7 @@ struct task_struct* running_thread() {
       PCB如果不是从0开始的，这样起始点就不正确，但是PCB是4KB对齐的
     */
     uint32_t esp;
-    asm ("mov %%esp,%0":"=g"(esp));
+    asm ("mov %%esp,%0":"=g"(esp));     //=约束为只读 g 允许任一寄存器、内存或者立即整形操作数，不包括通用寄存器之外的寄存器。
     return (struct task_struct*)(esp & 0xfffff000);
 }
 
@@ -70,7 +70,7 @@ void init_thread(struct task_struct* pthread, char* name, int prio) {
 
     /*self_stack是线程自己在内核态下使用的栈顶地址，在这里指定了栈顶地址，之后才能
     在thread_create中未中断和线程栈预空间*/
-    pthread->self_kstack = (uint32_t *)((uint32_t)pthread + PG_SIZE);
+    pthread->self_kstack = (uint32_t *)((uint32_t)pthread + PG_SIZE);   //地址只能转换成整数之后才能加减，然后将整数转换成相应的地址
 
     //不理解为什么栈在这个位置 pthread分配的是一页内存，用作PCB，get_kernel_pages(1)
     //返回的是低地址，因此+PG_SIZE相当于指向PCB的顶端
@@ -102,6 +102,13 @@ struct task_struct* thread_start(char* name, int prio, thread_func function, voi
     // asm volatile ("movl %0,%%esp;\
     // pop %%ebp;pop %%ebx;pop %%edi;pop %%esi;\
     // ret" : : "g"(thread->self_kstack) : "memory");
+
+    //这几条语句实际上被综合在了switch_to函数里面，next为首次使用时候，栈中存放的是kernel_thread函数指针
+    //因此跳转到kernel_thread函数执行
+
+    //mov esp,[eax] esp指向了next对应的位置
+
+
     //一个进程时的测试，通过ret执行
 
 
@@ -126,10 +133,13 @@ static void make_main_thread() {
     新的一页，有点奇怪，栈向下生长，这样就将pcb对应的内存空间破坏了    
     */ 
     main_thread = running_thread();
-    init_thread(main_thread, "main", 31);
+    init_thread(main_thread, "main", 31);  //会不会出现将之前的栈破坏的情况？
+    //现在main线程的esp在什么位置，一开始设置的esp是不是在pcb的低端？main线程的栈顶设置在PCB的顶端，esp仍然指向的是
+    //原来的位置，
     println("Here in make_main_thread()\n");
     ASSERT(!elem_find(&thread_all_list,&main_thread->all_list_tag));
     list_append(&thread_all_list,&main_thread->all_list_tag);
+    //为什么没有将main线程添加到thread_ready_list，在进行调度的时候，有TASK_RUNNING转变为TASK_READY状态，并将main线程添加到ready_list
     println("Add main thread to ready list \n");
 }
 
@@ -147,8 +157,9 @@ void schedule() {
         current->ticks=current->priority;
         current->status=TASK_READY;
     } else {
-
+       
     }
+    
     ASSERT(!list_empty(&thread_ready_list));
     thread_tag=NULL; //thread_tag清空
     /*从就绪队列中pop出来一个就绪线程，它只是一个general_tag

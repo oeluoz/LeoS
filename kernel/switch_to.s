@@ -2,7 +2,11 @@
  section .text
  global switch_to
  switch_to:
-    ; 栈中此处是返回地址
+    ;next
+    ;cur
+    ;栈中此处是返回地址
+    ;线程栈仅仅是一个存储数据的格式，表述了结构中各个成员的存储顺序，只是按照
+    ;这种顺序来压栈，并不一定在某一个固定的内存位置
     push esi
     push edi
     push ebx

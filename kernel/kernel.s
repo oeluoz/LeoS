@@ -39,9 +39,9 @@ intr%1entry:		 ; 每个中断处理程序都要压入中断向量号，
    push %1                       ;不管idt_table中的目标程序是否需要参数
                                  ;一律push 中断向量号
 
-   mov byte [gs:160],'p'
-   mov byte [0xb8000],'A'
-   ; jmp $
+   ; 时钟中断导致原来的执行流被改变，因此需要将原来的寄存器进行压栈保存，当call进入到调度程序
+   ; 里面再一次调用switch_to函数，需要将switch_to之前的寄存器进行压栈保存，执行一次任务切换需要两次保护现场
+   
    call [idt_table + %1*4]
    
    jmp intr_exit
